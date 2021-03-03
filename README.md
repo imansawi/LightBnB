@@ -1,0 +1,2 @@
+# LightBnB
+Lighthouse BnB Project
