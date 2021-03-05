@@ -2,15 +2,6 @@ const { Pool } = require("pg");
 const properties = require("./json/properties.json");
 const users = require("./json/users.json");
 
-// npm install pg
-// psql -h localhost -p 5432 -U vagrant lightbnb ===> ??
-
-// 1. Go into psql
-// 2. Run \password
-// 3. Type 123 and hit Enter
-
-// SELECT id, title, country, city FROM properties WHERE id < 11 LIMIT 5;
-
 const pool = new Pool({
   user: "vagrant",
   password: "123",
@@ -79,7 +70,7 @@ const addUser = function (user) {
   return pool.query(
     `
   INSERT INTO users (name, email, password)
-  VALUES ($1, $2, $3)`,
+  VALUES ($1, $2, $3) RETURNING id`,
     [name, email, password]
   );
 };
@@ -145,10 +136,48 @@ exports.getAllProperties = getAllProperties;
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
+
 const addProperty = function (property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  const {
+    owner_id,
+    title,
+    description,
+    thumbnail_photo_url,
+    cover_photo_url,
+    cost_per_night,
+    street,
+    city,
+    province,
+    post_code,
+    country,
+    parking_spaces,
+    number_of_bathrooms,
+    number_of_bedrooms,
+  } = property;
+
+  return pool.query(
+    `
+  INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, 
+    cost_per_night, street, city, province, post_code, country, parking_spaces, 
+    number_of_bathrooms, number_of_bedrooms)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
+    [
+      owner_id,
+      title,
+      description,
+      thumbnail_photo_url,
+      cover_photo_url,
+      cost_per_night,
+      street,
+      city,
+      province,
+      post_code,
+      country,
+      parking_spaces,
+      number_of_bathrooms,
+      number_of_bedrooms,
+    ]
+  );
 };
+
 exports.addProperty = addProperty;
